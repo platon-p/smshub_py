@@ -3,6 +3,7 @@
 Библиотека для автоматизации получения sms (а еще тут есть подсказки типов)
 
 ### Основные методы
+
 ```python
 from smshub_py import Client
 
@@ -16,9 +17,11 @@ if ACTIVATED:
 print(client.get_status(order_id))
 prices = client.get_prices('vk', 0)
 ```
-### Утилиты
-```python
 
+### Утилиты
+
+
+```python
 from smshub_py import Utils, Client
 
 client = Client(YOUR_TOKEN)
