@@ -1,8 +1,8 @@
-class BadKeyError(Exception):
+class BadApiKey(Exception):
     pass
 
 
-class ErrorSql(Exception):
+class SqlError(Exception):
     pass
 
 

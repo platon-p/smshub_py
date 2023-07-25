@@ -1,7 +1,7 @@
 from typing import Optional, Union
 import httpx
 
-from .exceptions import *
+from . import exceptions
 
 
 class SmsHubClient:
@@ -10,24 +10,53 @@ class SmsHubClient:
     def __init__(self, key: str):
         self.key = key
 
+    @staticmethod
+    def _process_status(r: httpx.Response):
+        if r.text == 'BAD_KEY':
+            raise exceptions.BadApiKey
+        elif r.text == 'ERROR_SQL':
+            raise exceptions.SqlError
+        elif r.text == 'NO_NUMBERS':
+            raise exceptions.NoNumbers
+        elif r.text == 'NO_BALANCE':
+            raise exceptions.NoBalance
+        elif r.text == 'WRONG_SERVICE':
+            raise exceptions.WrongService
+        elif r.text == 'NO_ACTIVATION':
+            raise exceptions.NoActivation
+
     def get_balance(self) -> float:
+        """
+        Get balance value
+        :return: Balance value
+        """
         req = httpx.get(self.base_url, params={'api_key': self.key, 'action': 'getBalance'})
         return float(req.text.replace('ACCESS_BALANCE:', ''))
 
     def get_number_status(self, country: Optional[int] = None, operator: Optional[str] = None) -> dict[str, int]:
+        """
+        Request for quantity available numbers
+        :param country: Country ID
+        :param operator: Operator code
+        :return: `Dict` service - numbers quantity
+        """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'getNumbersStatus',
             'country': country,
             'operator': operator,
         })
-        if req.text == 'BAD_KEY':
-            raise BadKeyError('Неверный API-ключ')
-        elif req.text == 'ERROR_SQL':
-            raise ErrorSql('Ошибка сервера')
+        self._process_status(req)
         return req.json()
 
     def get_number(self, service: str, operator: Optional[str] = None, country: Optional[int] = None) -> (int, int):
+        """
+        Request for using number
+        :param service: Service code
+        :param operator: Operator code
+        :param country: Country ID
+        :return:
+        """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'getNumber',
@@ -35,16 +64,16 @@ class SmsHubClient:
             'operator': operator,
             'country': country,
         })
-        if req.text == 'NO_NUMBERS':
-            raise NoNumbers('Нет номеров с заданными параметрами, попробуйте позже, или поменяйте оператора, страну.')
-        elif req.text == 'NO_BALANCE':
-            raise NoBalance('Закончились деньги на API-ключе')
-        elif req.text == 'WRONG_SERVICE':
-            raise WrongService('Не верный идентификатор сервиса')
-        else:
-            return tuple(map(int, req.text.split(':')[1:]))
+        self._process_status(req)
+        return tuple(map(int, req.text.split(':')[1:]))
 
     def set_status(self, id_: int, status: int) -> str:
+        """
+        Set current status of activation
+        :param id_: Activation ID
+        :param status: Status ID
+        :return: Status message
+        """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'setStatus',
@@ -54,21 +83,29 @@ class SmsHubClient:
         return req.text
 
     def get_status(self, id_: int) -> Union[str, tuple[int, int]]:
+        """
+        Get status of activation
+        :param id_: Activation ID
+        :return: Status message, with code if possible
+        """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'getStatus',
             'id': id_,
         })
-        if req.text == 'NO_ACTIVATION':
-            raise NoActivation('id активации не существует')
-        elif req.text == 'ERROR_SQL':
-            raise ErrorSql('Ошибка базы SQL-сервера')
-        elif req.text.startswith('STATUS_WAIT_RETRY') or req.text.startswith('STATUS_OK'):
+        self._process_status(req)
+        if req.text.startswith('STATUS_WAIT_RETRY') or req.text.startswith('STATUS_OK'):
             status, code = req.text.split(':')
             return status, code
         return req.text
 
     def get_prices(self, service: str = None, country: int = None) -> dict[str, dict[str, dict[str, int]]]:
+        """
+        Get all prices
+        :param service: Service code
+        :param country: Country ID
+        :return: `Dict` with prices
+        """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'getPrices',
@@ -109,36 +146,7 @@ class Utils:
                                  146: 'Реюньон', 148: 'Армения', 150: 'Конго', 152: 'Буркина-Фасо', 153: 'Ливан',
                                  154: 'Габон', 157: 'Маврикий', 158: 'Бутан', 159: 'Мальдивы', 161: 'Туркменистан',
                                  172: 'Дания', 179: 'Аруба', 187: 'США', 189: 'Фиджи', 195: 'Бермуды'}
-    __country_name_to_id_dict = {"Россия": 0, 'Украина': 1, 'Казахстан': 2, 'Китай': 3, 'Филиппины': 4, 'Мьянма': 5,
-                                 'Индонезия': 6, 'Малайзия': 7, 'Кения': 8, 'Танзания': 9, 'Вьетнам': 10,
-                                 'Кыргызстан': 11, 'США (виртуальные)': 12, 'Израиль': 13, 'Гонконг': 14, 'Польша': 15,
-                                 'Англия': 16, 'Дем.Конго': 18, 'Нигерия': 19, 'Египет': 21, 'Индия': 22,
-                                 'Ирландия': 23,
-                                 'Камбоджа': 24, 'Лаос': 25, 'Гаити': 26, "Кот д'Ивуар": 27, 'Гамбия': 28, 'Сербия': 29,
-                                 'Йемен': 30, 'Южная Африка': 31, 'Румыния': 32, 'Колумбия': 33, 'Эстония': 34,
-                                 'Канада': 36, 'Марокко': 37, 'Гана': 38, 'Аргентина': 39, 'Узбекистан': 40,
-                                 'Камерун': 41, 'Чад': 42, 'Германия': 43, 'Литва': 44, 'Хорватия': 45, 'Швеция': 46,
-                                 'Ирак': 47, 'Нидерланды': 48, 'Латвия': 49, 'Австрия': 50, 'Беларусь': 51,
-                                 'Таиланд': 52,
-                                 'Сауд. Аравия': 53, 'Мексика': 54, 'Тайвань': 55, 'Испания': 56, 'Иран': 57,
-                                 'Алжир': 58,
-                                 'Бангладеш': 60, 'Сенегал': 61, 'Турция': 62, 'Чехия': 63, 'Шри-Ланка': 64, 'Перу': 65,
-                                 'Пакистан': 66, 'Новая Зеландия': 67, 'Гвинея': 68, 'Мали': 69, 'Венесуэла': 70,
-                                 'Монголия': 72, 'Бразилия': 73, 'Афганистан': 74, 'Уганда': 75, 'Ангола': 76,
-                                 'Кипр': 77,
-                                 'Франция': 78, 'Папуа-Новая Гвинея': 79, 'Мозамбик': 80, 'Непал': 81, 'Молдова': 85,
-                                 'Парагвай': 87, 'Гондурас': 88, 'Тунис': 89, 'Никарагуа': 90, 'Боливия': 92,
-                                 'Гватемала': 94, 'ОАЭ': 95, 'Зимбабве': 96, 'Судан': 98, 'Сальвадор': 101,
-                                 'Ливия': 102,
-                                 'Ямайка': 103, 'Тринидад и Тобаго': 104, 'Эквадор': 105,
-                                 'Доминиканская Республика': 109,
-                                 'Сирия': 110, 'Мавритания': 114, 'Сьерра-Леоне': 115, 'Иордания': 116,
-                                 'Португалия': 117,
-                                 'Бенин': 120, 'Бруней': 121, 'Ботсвана': 123, 'Доминика': 126, 'Грузия': 128,
-                                 'Греция': 129, 'Гайана': 131, 'Либерия': 135, 'Суринам': 142, 'Таджикистан': 143,
-                                 'Реюньон': 146, 'Армения': 148, 'Конго': 150, 'Буркина-Фасо': 152, 'Ливан': 153,
-                                 'Габон': 154, 'Маврикий': 157, 'Бутан': 158, 'Мальдивы': 159, 'Туркменистан': 161,
-                                 'Дания': 172, 'Аруба': 179, 'США': 187, 'Фиджи': 189, 'Бермуды': 195}
+    __country_name_to_id_dict = {v: k for k, v in __id_to_country_name_dict.items()}
 
     def __init__(self, client: SmsHubClient):
         self.client = client
