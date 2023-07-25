@@ -1,1 +1,1 @@
-from ._wrapper import SmsHubClient
+from .wrapper import SmsHubWrapper

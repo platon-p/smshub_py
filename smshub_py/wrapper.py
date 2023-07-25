@@ -4,7 +4,7 @@ import httpx
 from . import exceptions
 
 
-class SmsHubClient:
+class SmsHubWrapper:
     base_url = 'https://smshub.org/stubs/handler_api.php'
 
     def __init__(self, key: str):
@@ -148,7 +148,7 @@ class Utils:
                                  172: 'Дания', 179: 'Аруба', 187: 'США', 189: 'Фиджи', 195: 'Бермуды'}
     __country_name_to_id_dict = {v: k for k, v in __id_to_country_name_dict.items()}
 
-    def __init__(self, client: SmsHubClient):
+    def __init__(self, client: SmsHubWrapper):
         self.client = client
 
     def find_min_prices(self, service: str, count: int = None) -> list[tuple[float, str, int]]:
