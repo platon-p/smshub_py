@@ -8,7 +8,7 @@ from ..exceptions import IncorrectResponse, TimeoutException
 
 
 class AsyncSmsActivation:
-    def __init__(self, api_key: str, service: str, operator: Optional[str] = None, country: Optional[int] = None):
+    def __init__(self, api_key: str, service: str, operator: Optional[str] = '', country: Optional[int] = ''):
         """
         Provides convenient asynchronous operations with activation on SmsHub
         :param api_key: API key for SmsHub
@@ -31,6 +31,9 @@ class AsyncSmsActivation:
     async def __aenter__(self):
         await self.init_()
         return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return
 
     async def sms_sent(self):
         """
