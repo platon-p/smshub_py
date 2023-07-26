@@ -20,3 +20,8 @@ class WrongService(Exception):
 
 class NoActivation(Exception):
     pass
+
+
+# Country errors
+class NoCountryException(Exception):
+    pass
