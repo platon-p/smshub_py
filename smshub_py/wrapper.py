@@ -17,6 +17,12 @@ class SmsHubWrapper:
         self.key = key
         self.proxy = proxy
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return
+
     @staticmethod
     def _process_status(r: httpx.Response):
         if r.text == 'BAD_KEY':

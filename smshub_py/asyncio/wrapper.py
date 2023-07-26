@@ -17,6 +17,12 @@ class AsyncSmsHubWrapper:
         self.key = key
         self.proxy = proxy
 
+    def __aenter__(self):
+        return self
+
+    def __aexit__(self, exc_type, exc_val, exc_tb):
+        return
+
     @staticmethod
     async def _process_status(r: aiohttp.ClientResponse):
         if await r.text() == 'BAD_KEY':
