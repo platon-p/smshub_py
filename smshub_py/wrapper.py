@@ -50,7 +50,7 @@ class SmsHubWrapper:
             'api_key': self.key,
             'action': 'getNumbersStatus',
             'country': country,
-            'operator': operator,
+            'operator': operator
         })
         self._process_status(req)
         return req.json()
@@ -68,7 +68,7 @@ class SmsHubWrapper:
             'action': 'getNumber',
             'service': service,
             'operator': operator,
-            'country': country,
+            'country': country
         })
         self._process_status(req)
         return tuple(map(int, req.text.split(':')[1:]))
@@ -84,8 +84,9 @@ class SmsHubWrapper:
             'api_key': self.key,
             'action': 'setStatus',
             'id': id_,
-            'status': status,
+            'status': status
         })
+        self._process_status(req)
         return req.text
 
     def get_status(self, id_: int) -> (int, int):
@@ -97,7 +98,7 @@ class SmsHubWrapper:
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
             'action': 'getStatus',
-            'id': id_,
+            'id': id_
         })
         self._process_status(req)
         if req.text.startswith(STATUS_WAIT_RETRY) or req.text.startswith(STATUS_OK):
@@ -116,6 +117,7 @@ class SmsHubWrapper:
             'api_key': self.key,
             'action': 'getPrices',
             'service': service,
-            'country': country,
+            'country': country
         })
+        self._process_status(req)
         return req.json()
