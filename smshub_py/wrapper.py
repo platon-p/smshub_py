@@ -9,6 +9,10 @@ class SmsHubWrapper:
     base_url = 'https://smshub.org/stubs/handler_api.php'
 
     def __init__(self, key: str):
+        """
+        Wrapper for SmsHub API
+        :param key: API Key for SmsHub
+        """
         self.key = key
 
     @staticmethod
