@@ -24,6 +24,12 @@ class SmsActivation:
         self.status = None
         self.update_status()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return
+
     def sms_sent(self):
         """
         Say SmsHub that your SMS was sent
