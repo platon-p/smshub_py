@@ -32,6 +32,7 @@ class SmsHubWrapper:
         :return: Balance value
         """
         req = httpx.get(self.base_url, params={'api_key': self.key, 'action': 'getBalance'})
+        self._process_status(req)
         return float(req.text.replace('ACCESS_BALANCE:', ''))
 
     def get_number_status(self, country: Optional[int] = None, operator: Optional[str] = None) -> dict[str, int]:
