@@ -27,6 +27,10 @@ class IncorrectResponse(Exception):
         super().__init__(f"Invalid responce. Needed \'{needed}\' got \'{got}\'")
 
 
+class TimeoutException(Exception):
+    pass
+
+
 # Country errors
 class NoCountryException(Exception):
     pass
