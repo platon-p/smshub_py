@@ -39,7 +39,7 @@ class AsyncSmsHubWrapper:
             await self._process_status(req)
             return float((await req.text()).replace('ACCESS_BALANCE:', ''))
 
-    async def get_number_status(self, country: Optional[int] = None, operator: Optional[str] = None) -> dict[str, int]:
+    async def get_number_status(self, country: Optional[int] = '', operator: Optional[str] = '') -> dict[str, int]:
         """
         Request for quantity available numbers
         :param country: Country ID
@@ -55,7 +55,7 @@ class AsyncSmsHubWrapper:
             await self._process_status(req)
             return await req.json()
 
-    async def get_number(self, service: str, operator: Optional[str] = None, country: Optional[int] = None) -> (
+    async def get_number(self, service: str, operator: Optional[str] = '', country: Optional[int] = '') -> (
             int, int):
         """
         Request for using number
@@ -107,7 +107,8 @@ class AsyncSmsHubWrapper:
                 return status, code
             return await req.text(), 0
 
-    async def get_prices(self, service: str = None, country: int = None) -> dict[str, dict[str, dict[str, int]]]:
+    async def get_prices(self, service: Optional[str] = '', country: Optional[int] = '') ->\
+            dict[str, dict[str, dict[str, int]]]:
         """
         Get all prices
         :param service: Service code
