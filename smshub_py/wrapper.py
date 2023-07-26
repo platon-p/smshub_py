@@ -6,7 +6,7 @@ from .status import STATUS_WAIT_RETRY, STATUS_OK
 
 
 class SmsHubWrapper:
-    base_url = 'https://smshub.org/stubs/handler_api.php'
+    base_url = 'https://www.smshub.org/stubs/handler_api.php'
 
     def __init__(self, key: str, proxy: Optional[str] = None):
         """
