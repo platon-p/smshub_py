@@ -55,7 +55,7 @@ class SmsHubWrapper:
         :param service: Service code
         :param operator: Operator code
         :param country: Country ID
-        :return:
+        :return: Activation ID and phone number
         """
         req = httpx.get(self.base_url, params={
             'api_key': self.key,
