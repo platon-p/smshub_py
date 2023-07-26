@@ -18,15 +18,15 @@ __countries_id = {0: 'RU', 1: 'UA', 2: 'KZ', 3: 'CN', 4: 'PH', 5: 'MM', 6: 'ID',
 __id_countries = {v: k for k, v in __countries_id.items()}
 
 
-def find_min_prices(client: SmsHubWrapper, service: str, count: int = None) -> list[tuple[float, str, int]]:
+def find_min_prices(wrapper: SmsHubWrapper, service: str, count: int = None) -> list[tuple[float, str, int]]:
     """
-    :param client: SmsHubClient wrapper object
+    :param wrapper: SmsHubClient wrapper object
     :param service: Service code
     :param count: Results count (optional)
     :return: List of tuples (price, country ID, numbers quantity)
     """
     ans = []
-    for country, val in client.get_prices(service).items():
+    for country, val in wrapper.get_prices(service).items():
         if service in val.keys():
             ans.extend([(float(i[0]), country, i[1]) for i in val[service].items()])
     return sorted(ans, key=lambda x: x[0])[:count]
