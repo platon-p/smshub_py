@@ -82,7 +82,7 @@ class SmsHubWrapper:
         })
         return req.text
 
-    def get_status(self, id_: int) -> Union[str, tuple[int, int]]:
+    def get_status(self, id_: int) -> (int, int):
         """
         Get status of activation
         :param id_: Activation ID
@@ -97,7 +97,7 @@ class SmsHubWrapper:
         if req.text.startswith('STATUS_WAIT_RETRY') or req.text.startswith('STATUS_OK'):
             status, code = req.text.split(':')
             return status, code
-        return req.text
+        return req.text, 0
 
     def get_prices(self, service: str = None, country: int = None) -> dict[str, dict[str, dict[str, int]]]:
         """
