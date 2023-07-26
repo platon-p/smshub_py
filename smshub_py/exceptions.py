@@ -22,6 +22,11 @@ class NoActivation(Exception):
     pass
 
 
+class IncorrectResponse(Exception):
+    def __init__(self, needed: str, got: str):
+        super().__init__(f"Invalid responce. Needed \'{needed}\' got \'{got}\'")
+
+
 # Country errors
 class NoCountryException(Exception):
     pass
