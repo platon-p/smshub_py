@@ -1,4 +1,5 @@
 from .wrapper import SmsHubWrapper
+from .asyncio.wrapper import AsyncSmsHubWrapper
 from .exceptions import NoCountryException
 
 __countries_id = {0: 'RU', 1: 'UA', 2: 'KZ', 3: 'CN', 4: 'PH', 5: 'MM', 6: 'ID', 7: 'MY', 8: 'KE', 9: 'TZ', 10: 'VN',
@@ -20,13 +21,28 @@ __id_countries = {v: k for k, v in __countries_id.items()}
 
 def find_min_prices(wrapper: SmsHubWrapper, service: str, count: int = None) -> list[tuple[float, str, int]]:
     """
-    :param wrapper: SmsHubClient wrapper object
+    :param wrapper: :class:`SmsHubWrapper` wrapper object
     :param service: Service code
     :param count: Results count (optional)
-    :return: List of tuples (price, country ID, numbers quantity)
+    :return: List of tuples (price, country ID, numbers quantity) sorted by price
     """
     ans = []
     for country, val in wrapper.get_prices(service).items():
+        if service in val.keys():
+            ans.extend([(float(i[0]), country, i[1]) for i in val[service].items()])
+    return sorted(ans, key=lambda x: x[0])[:count]
+
+
+async def async_find_min_prices(wrapper: AsyncSmsHubWrapper, service: str, count: int = None) -> \
+        list[tuple[float, str, int]]:
+    """
+    :param wrapper: :class:`AsyncSmsHubWrapper` wrapper object
+    :param service: Service code
+    :param count: Results count (optional)
+    :return: List of tuples (price, country ID, numbers quantity) sorted by price
+    """
+    ans = []
+    for country, val in (await wrapper.get_prices(service)).items():
         if service in val.keys():
             ans.extend([(float(i[0]), country, i[1]) for i in val[service].items()])
     return sorted(ans, key=lambda x: x[0])[:count]
