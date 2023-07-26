@@ -3,7 +3,7 @@ import time
 
 from .wrapper import SmsHubWrapper
 from .status import *
-from .exceptions import IncorrectResponse
+from .exceptions import IncorrectResponse, TimeoutException
 
 
 class SmsActivation:
@@ -52,4 +52,4 @@ class SmsActivation:
                 break
             time.sleep(abs(interval - (time.time() - last_time) * (interval > (time.time() - last_time))))
         else:
-            raise TimeoutError
+            raise TimeoutException
