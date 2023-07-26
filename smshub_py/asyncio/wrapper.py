@@ -8,12 +8,14 @@ from ..status import STATUS_WAIT_RETRY, STATUS_OK
 class AsyncSmsHubWrapper:
     base_url = 'https://smshub.org/stubs/handler_api.php'
 
-    def __init__(self, key: str):
+    def __init__(self, key: str, proxy: Optional[str] = None):
         """
         Asynchronous wrapper for SmsHub API
         :param key: API Key for SmsHub
+        :param proxy: protocol://ip:port OR protocol://user:password@ip:port
         """
         self.key = key
+        self.proxy = proxy
 
     @staticmethod
     async def _process_status(r: aiohttp.ClientResponse):
@@ -35,7 +37,8 @@ class AsyncSmsHubWrapper:
         Get balance value
         :return: Balance value
         """
-        async with aiohttp.request('GET', self.base_url, params={'api_key': self.key, 'action': 'getBalance'}) as req:
+        async with aiohttp.request('GET', self.base_url, params={'api_key': self.key, 'action': 'getBalance'},
+                                   proxy=self.proxy) as req:
             await self._process_status(req)
             return float((await req.text()).replace('ACCESS_BALANCE:', ''))
 
@@ -51,7 +54,7 @@ class AsyncSmsHubWrapper:
             'action': 'getNumbersStatus',
             'country': country,
             'operator': operator
-        }) as req:
+        }, proxy=self.proxy) as req:
             await self._process_status(req)
             return await req.json()
 
@@ -70,7 +73,7 @@ class AsyncSmsHubWrapper:
             'service': service,
             'operator': operator,
             'country': country
-        }) as req:
+        }, proxy=self.proxy) as req:
             await self._process_status(req)
             return tuple(map(int, (await req.text()).split(':')[1:]))
 
@@ -86,7 +89,7 @@ class AsyncSmsHubWrapper:
             'action': 'setStatus',
             'id': id_,
             'status': status
-        }) as req:
+        }, proxy=self.proxy) as req:
             await self._process_status(req)
             return await req.text()
 
@@ -100,14 +103,14 @@ class AsyncSmsHubWrapper:
             'api_key': self.key,
             'action': 'getStatus',
             'id': id_
-        }) as req:
+        }, proxy=self.proxy) as req:
             await self._process_status(req)
             if (await req.text()).startswith(STATUS_WAIT_RETRY) or (await req.text()).startswith(STATUS_OK):
                 status, code = (await req.text()).split(':')
                 return status, code
             return await req.text(), 0
 
-    async def get_prices(self, service: Optional[str] = '', country: Optional[int] = '') ->\
+    async def get_prices(self, service: Optional[str] = '', country: Optional[int] = '') -> \
             dict[str, dict[str, dict[str, int]]]:
         """
         Get all prices
@@ -120,6 +123,6 @@ class AsyncSmsHubWrapper:
             'action': 'getPrices',
             'service': service,
             'country': country,
-        }) as req:
+        }, proxy=self.proxy) as req:
             await self._process_status(req)
             return await req.json()

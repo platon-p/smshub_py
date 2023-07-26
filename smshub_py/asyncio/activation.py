@@ -8,15 +8,17 @@ from ..exceptions import IncorrectResponse, TimeoutException
 
 
 class AsyncSmsActivation:
-    def __init__(self, api_key: str, service: str, operator: Optional[str] = '', country: Optional[int] = ''):
+    def __init__(self, api_key: str, service: str, operator: Optional[str] = '', country: Optional[int] = '',
+                 proxy: Optional[str] = None):
         """
         Provides convenient asynchronous operations with activation on SmsHub
         :param api_key: API key for SmsHub
         :param service: Service code
         :param operator: Operator name
         :param country: Country ID
+        :param proxy: protocol://ip:port OR protocol://user:password@ip:port
         """
-        self.wrapper = AsyncSmsHubWrapper(key=api_key)
+        self.wrapper = AsyncSmsHubWrapper(key=api_key, proxy=proxy)
         self.service = service
         self.operator = operator
         self.country_code = country
@@ -37,8 +39,8 @@ class AsyncSmsActivation:
 
     async def sms_sent(self):
         """
-                Say SmsHub that your SMS was sent
-                """
+        Say SmsHub that your SMS was sent
+        """
         r = await self.wrapper.set_status(self.activation_id, status=SMS_SENT)
         if r != ACCESS_READY:
             raise IncorrectResponse(ACCESS_READY, r)

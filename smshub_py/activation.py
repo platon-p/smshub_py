@@ -7,15 +7,17 @@ from .exceptions import IncorrectResponse, TimeoutException
 
 
 class SmsActivation:
-    def __init__(self, api_key: str, service: str, operator: Optional[str] = None, country: Optional[int] = None):
+    def __init__(self, api_key: str, service: str, operator: Optional[str] = None, country: Optional[int] = None,
+                 proxy: Optional[str] = None):
         """
         Provides convenient operations with activation on SmsHub
         :param api_key: API key for SmsHub
         :param service: Service code
         :param operator: Operator name
         :param country: Country ID
+        :param proxy: protocol://ip:port OR protocol://user:password@ip:port
         """
-        self.wrapper = SmsHubWrapper(key=api_key)
+        self.wrapper = SmsHubWrapper(key=api_key, proxy=proxy)
         self.service = service
         self.operator = operator
         self.country_code = country

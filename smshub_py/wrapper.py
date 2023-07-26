@@ -8,12 +8,14 @@ from .status import STATUS_WAIT_RETRY, STATUS_OK
 class SmsHubWrapper:
     base_url = 'https://smshub.org/stubs/handler_api.php'
 
-    def __init__(self, key: str):
+    def __init__(self, key: str, proxy: Optional[str] = None):
         """
         Wrapper for SmsHub API
         :param key: API Key for SmsHub
+        :param proxy: protocol://ip:port OR protocol://user:password@ip:port
         """
         self.key = key
+        self.proxy = proxy
 
     @staticmethod
     def _process_status(r: httpx.Response):
@@ -35,7 +37,7 @@ class SmsHubWrapper:
         Get balance value
         :return: Balance value
         """
-        req = httpx.get(self.base_url, params={'api_key': self.key, 'action': 'getBalance'})
+        req = httpx.get(self.base_url, params={'api_key': self.key, 'action': 'getBalance'}, proxies=self.proxy)
         self._process_status(req)
         return float(req.text.replace('ACCESS_BALANCE:', ''))
 
@@ -51,7 +53,7 @@ class SmsHubWrapper:
             'action': 'getNumbersStatus',
             'country': country,
             'operator': operator
-        })
+        }, proxies=self.proxy)
         self._process_status(req)
         return req.json()
 
@@ -69,7 +71,7 @@ class SmsHubWrapper:
             'service': service,
             'operator': operator,
             'country': country
-        })
+        }, proxies=self.proxy)
         self._process_status(req)
         return tuple(map(int, req.text.split(':')[1:]))
 
@@ -85,7 +87,7 @@ class SmsHubWrapper:
             'action': 'setStatus',
             'id': id_,
             'status': status
-        })
+        }, proxies=self.proxy)
         self._process_status(req)
         return req.text
 
@@ -99,7 +101,7 @@ class SmsHubWrapper:
             'api_key': self.key,
             'action': 'getStatus',
             'id': id_
-        })
+        }, proxies=self.proxy)
         self._process_status(req)
         if req.text.startswith(STATUS_WAIT_RETRY) or req.text.startswith(STATUS_OK):
             status, code = req.text.split(':')
@@ -118,6 +120,6 @@ class SmsHubWrapper:
             'action': 'getPrices',
             'service': service,
             'country': country
-        })
+        }, proxies=self.proxy)
         self._process_status(req)
         return req.json()
